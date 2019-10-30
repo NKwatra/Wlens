@@ -1,3 +1,7 @@
 .bg-gray {
-    background: #e0e0e0;
+    background: #e5e5e5;
+}
+
+.card-img-top {
+    max-height: 35vh;
 }
