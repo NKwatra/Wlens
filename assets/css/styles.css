@@ -5,3 +5,13 @@
 .card-img-top {
     max-height: 35vh;
 }
+
+#searchbar {
+    max-width: 30%;
+}
+
+@media screen and (max-width: 991.98px) {
+    #searchbar {
+        max-width: 60%;
+    }
+}
