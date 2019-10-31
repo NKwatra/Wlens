@@ -1,7 +1,7 @@
 let retryRequest = false;
 const updatePageContent = response => {
     retryRequest = false;
-    const data = JSON.parse(response);
+    const data = response;
     const results = data.results;
     let fragment = new DocumentFragment();
     for (let i = 0; i < Math.min(40, results.length); i++) {
@@ -69,7 +69,7 @@ const errorAlert = (target) => {
 
 const updateSearchText = resp => {
     retryRequest = false;
-    const data = JSON.parse(resp);
+    const data = resp;
     const docs = data.response.docs;
     let fragment = new DocumentFragment();
     for (let i = 0; i < Math.min(40, docs.length); i++) {
@@ -107,15 +107,16 @@ const updateSearchText = resp => {
 document.addEventListener("DOMContentLoaded", function () {
     retryRequest = false;
     const API_KEY = "<your-api-key>";
-    const homeRequest = new XMLHttpRequest();
-    homeRequest.open("GET", `https://api.nytimes.com/svc/topstories/v2/home.json?api-key=${API_KEY}`);
-    homeRequest.send();
-    homeRequest.onload = function () {
-        updatePageContent(this.responseText);
-    }
-    homeRequest.onerror = function () {
-        errorAlert(document.querySelector(".sidebar-brand"));
-    };
+    fetch(`https://api.nytimes.com/svc/topstories/v2/home.json?api-key=${API_KEY}`)
+        .then(response => {
+            if (response.status == 200)
+                response.json().then(updatePageContent);
+            else
+                errorAlert(document.querySelector(".sidebar-brand"));
+        }).catch(error => {
+            console.log(error);
+            errorAlert(document.querySelector(".sidebar-brand"));
+        })
 
 
     document.getElementById("category-listener").addEventListener('click', function (e) {
@@ -123,30 +124,32 @@ document.addEventListener("DOMContentLoaded", function () {
         const target = e.target;
         document.querySelector(".sidebar-brand").removeAttribute('class');
         target.parentNode.setAttribute('class', 'sidebar-brand');
-        const categoryRequest = new XMLHttpRequest();
         const category = target.textContent.replace(/\s/g, "").toLowerCase();
-        categoryRequest.open("GET", `https://api.nytimes.com/svc/topstories/v2/${category}.json?api-key=${API_KEY}`);
-        categoryRequest.send();
-        categoryRequest.onload = function () {
-            updatePageContent(this.responseText);
-        }
-        categoryRequest.onerror = function () {
-            errorAlert(target);
-        }
+        fetch(`https://api.nytimes.com/svc/topstories/v2/${category}.json?api-key=${API_KEY}`)
+            .then(response => {
+                if (response.status == 200)
+                    response.json().then(updatePageContent);
+                else
+                    errorAlert(target);
+            }).catch((error) => {
+                console.log(error);
+                errorAlert(target);
+            });
     })
 
     const searchbar = document.getElementById("searchbar");
     const makeSearchRequest = () => {
         const text = searchbar.value;
-        const searchRequest = new XMLHttpRequest();
-        searchRequest.open("GET", `https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${text}&api-key=${API_KEY}`);
-        searchRequest.send();
-        searchRequest.onerror = function () {
-            errorAlert(searchbar);
-        }
-        searchRequest.onload = function () {
-            updateSearchText(this.responseText);
-        }
+        fetch(`https://api.nytimes.com/svc/search/v2/articlesearch.json?q=${text}&api-key=${API_KEY}`)
+            .then(response => {
+                if (response.status == 200)
+                    response.json().then(updateSearchText);
+                else
+                    errorAlert(searchbar);
+            }).catch(error => {
+                console.log(error);
+                errorAlert(searchbar);
+            })
     }
 
     searchbar.addEventListener("change", function () {
